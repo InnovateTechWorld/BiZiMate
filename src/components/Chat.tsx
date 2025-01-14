@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { formatModelResponse } from '../utils/textFormatting';
 
 type Message = {
   id: number;
@@ -16,16 +17,19 @@ const dummyResponses = [
 ];
 
 export function Chat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  React.useEffect(() => {
+    const initialMessage: Message = {
       id: 1,
       type: 'assistant',
       content: "Hello! I'm your AI business assistant. How can I help you today? You can ask me about market research, business planning, or get insights from your documents.",
       timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+    };
+    setMessages([initialMessage]);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -37,22 +41,51 @@ export function Chat() {
       content: input,
       timestamp: new Date(),
     };
-
-    setMessages(prev => [...prev, userMessage]);
+    
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://bizi-rgdl.onrender.com/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          history: messages.slice(1).map(msg => ({
+            role: msg.type === 'user' ? 'user' : 'model',
+            text: msg.content
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       const aiMessage: Message = {
         id: messages.length + 2,
         type: 'assistant',
-        content: dummyResponses[Math.floor(Math.random() * dummyResponses.length)],
+        content: data.response,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const aiMessage: Message = {
+        id: messages.length + 2,
+        type: 'assistant',
+        content: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -86,8 +119,12 @@ export function Chat() {
                         ? 'bg-accent text-white ml-12'
                         : 'bg-gray-800 mr-12'
                     }`}
+                    dangerouslySetInnerHTML={{
+                      __html: message.type === 'assistant'
+                        ? formatModelResponse(message.content)
+                        : message.content
+                    }}
                   >
-                    {message.content}
                   </div>
                 </div>
               ))}

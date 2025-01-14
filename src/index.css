@@ -43,3 +43,11 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-600;
 }
+
+strong {
+  font-weight: 600;
+}
+
+br {
+  margin-bottom: 0.5rem;
+}
