@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #0A2647;
+    --secondary: #144272;
+    --accent: #205295;
+    --background: #030617;
+  }
+}
+
+body {
+  @apply bg-background text-gray-100;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-secondary px-6 py-2 rounded-lg transition-colors duration-200;
+}
+
+.card {
+  @apply bg-gray-900/50 rounded-xl p-6 backdrop-blur-sm border border-gray-800;
+}
+
+.input {
+  @apply bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-accent w-full;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}
