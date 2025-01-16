@@ -20,6 +20,12 @@ export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [product, setProduct] = useState('');
+  const [targetCustomer, setTargetCustomer] = useState('');
+  const [geographicMarket, setGeographicMarket] = useState('');
+  const [pricingStrategy, setPricingStrategy] = useState('');
+  const [mainChannels, setMainChannels] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   React.useEffect(() => {
     const initialMessage: Message = {
@@ -29,6 +35,17 @@ export function Chat() {
       timestamp: new Date(),
     };
     setMessages([initialMessage]);
+
+    const storedFields = localStorage.getItem('businessFields') || sessionStorage.getItem('businessFields');
+    if (storedFields) {
+      const fields = JSON.parse(storedFields);
+      setProduct(fields.product);
+      setTargetCustomer(fields.targetCustomer);
+      setGeographicMarket(fields.geographicMarket);
+      setPricingStrategy(fields.pricingStrategy);
+      setMainChannels(fields.mainChannels);
+      setFormSubmitted(true);
+    }
   }, []);
 
   const handleSend = async () => {
@@ -59,6 +76,11 @@ export function Chat() {
             role: msg.type === 'user' ? 'user' : 'model',
             text: msg.content
           })),
+          product: product || 'N/A',
+          targetCustomer: targetCustomer || 'N/A',
+          geographicMarket: geographicMarket || 'N/A',
+          pricingStrategy: pricingStrategy || 'N/A',
+          mainChannels: mainChannels || 'N/A',
         }),
       });
 
@@ -136,7 +158,99 @@ export function Chat() {
                 </div>
               )}
             </div>
-
+            {!formSubmitted && (
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold mb-4">
+                  Tell us about your business
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      What product or service do you offer? Be specific – the
+                      more detail, the better.
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={product}
+                      onChange={(e) => setProduct(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Who is your target customer? Describe their demographics
+                      (age, location, income, etc.), psychographics (lifestyle,
+                      values, interests), and buying behavior.
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={targetCustomer}
+                      onChange={(e) => setTargetCustomer(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      What is your geographic market? Local, regional,
+                      national, or international?
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={geographicMarket}
+                      onChange={(e) => setGeographicMarket(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      What is your pricing strategy? How does it compare to
+                      competitors?
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={pricingStrategy}
+                      onChange={(e) => setPricingStrategy(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      What are the main channels you use (or plan to use) to
+                      reach your customers? (e.g., online advertising, social
+                      media, direct sales, retail partnerships)
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={mainChannels}
+                      onChange={(e) => setMainChannels(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className="btn-primary p-3 rounded-lg col-span-2 md:col-span-1"
+                    onClick={() => {
+                      setFormSubmitted(true);
+                      localStorage.setItem('businessFields', JSON.stringify({
+                        product,
+                        targetCustomer,
+                        geographicMarket,
+                        pricingStrategy,
+                        mainChannels,
+                      }));
+                      sessionStorage.setItem('businessFields', JSON.stringify({
+                        product,
+                        targetCustomer,
+                        geographicMarket,
+                        pricingStrategy,
+                        mainChannels,
+                      }));
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            )}
             {/* Input Area */}
             <div className="flex gap-2">
               <input
